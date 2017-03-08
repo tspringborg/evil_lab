@@ -1,0 +1,31 @@
+.side{
+	width: 90vw;
+	height: 70vw;
+}
+.side.front{
+	font-size: 2rem;
+}
+.square{
+	box-sizing: border-box;
+	overflow:hidden;
+	float:left;
+	border: 1px solid red;
+	width:33.3%;
+	height:33.3%;
+	position: relative;
+	text-align:center;
+}
+.square .label {
+	box-sizing: border-box;
+	padding: 3%;
+	position: absolute;
+	top:50%;
+	width:100%;
+	transform: translateY(-50%);
+}
+
+@media print{
+	.non-print{
+		display:none;
+	}
+}
