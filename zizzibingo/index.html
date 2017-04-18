@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Welcome to Vue</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.1/vue.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+  <link href="./style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+  <div id="app">
+    <div class="non-print">
+      <h1>Zizzibingo</h1>
+      <span @click="window.print()">print</span>
+    </div>
+    <div class="side front">
+      <square v-for="item in pickedOptions" :style="'font-size:'+getFontSize(item.label)+'em'">
+        {{item.label}}
+      </square>
+    </div>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>
