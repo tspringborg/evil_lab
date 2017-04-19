@@ -1,5 +1,6 @@
 var props = {
   distortFactor: 0.5,
+  distortSpeed: 1,
   distortX: 5,
   distortY: 5,
   distortZ: 5,
@@ -7,12 +8,13 @@ var props = {
   rotationY: 0.001,
   rotationX: 0.000,
   rotationZ: 0.000,
-  amplitudeDelta: 0.01,
-  amplitudeX: 0.1,
-  amplitudeY: 0.1,
+  amplitudeFactor: 0.01,
+  amplitudeX: 0.35,
+  amplitudeY: 0.35,
   amplitudeZ: 1,
   color1: [251, 92, 15],
-  color2: [135, 3, 244]
+  color2: [188, 44, 138],
+  color3: [135, 3, 244],
 }
 var color1Control, color2Control, stats
 window.onload = function() {
@@ -20,6 +22,7 @@ window.onload = function() {
   var f1 = gui.addFolder('Distortion');
   f1.open()
   f1.add(props, 'distortFactor', 0, 3)
+  f1.add(props, 'distortSpeed', 0, 20)
   f1.add(props, 'distortX', 0, 10)
   f1.add(props, 'distortY', 0, 10)
   f1.add(props, 'distortZ', 0, 10)
@@ -27,13 +30,13 @@ window.onload = function() {
 
   var f2 = gui.addFolder('Texture')
   f2.open()
-  // f2.add(props, 'amplitudeDelta', 0, 0.1).step(0.001).onChange(function(value) {
+  // f2.add(props, 'amplitudeFactor', 0, 0.1).step(0.001).onChange(function(value) {
   //   sphere.addAttribute( 'color', getColors());
   // })
-  f2.add(props, 'amplitudeX', 0, 0.5).onChange(function(value) {
+  f2.add(props, 'amplitudeX', 0, 1).onChange(function(value) {
     sphere.addAttribute( 'color', getColors());
   })
-  f2.add(props, 'amplitudeY', 0, 0.5).onChange(function(value) {
+  f2.add(props, 'amplitudeY', 0, 1).onChange(function(value) {
     sphere.addAttribute( 'color', getColors());
   })
   f2.add(props, 'amplitudeZ', 0, 1).onChange(function(value) {
@@ -41,6 +44,7 @@ window.onload = function() {
   })
   color1Control = f2.addColor(props, 'color1')
   color2Control = f2.addColor(props, 'color2')
+  color3Control = f2.addColor(props, 'color3')
   gui.add(props, 'rotationDelta', 0, 1)
   gui.add(props, 'rotationY', 0, 0.05)
   gui.add(props, 'rotationZ', 0, 0.05)
@@ -49,6 +53,9 @@ window.onload = function() {
     sphere.addAttribute( 'color', getColors());
   })
   color2Control.onChange(function(value) {
+    sphere.addAttribute( 'color', getColors());
+  })
+  color3Control.onChange(function(value) {
     sphere.addAttribute( 'color', getColors());
   })
 
@@ -89,11 +96,22 @@ var material = new THREE.ShaderMaterial({
 function getColors() {
   var colors = new Float32Array(sphere.attributes.position.array.length);
   for(var i=0;i<sphere.attributes.position.array.length;i+=3){
-    var perlin = Math.abs(noise.simplex3(sphere.attributes.position.array[i]*props.amplitudeDelta * props.amplitudeX, sphere.attributes.position.array[i+1]*props.amplitudeDelta * props.amplitudeY, sphere.attributes.position.array[i+2]*props.amplitudeDelta) * props.amplitudeZ);
+    var perlin = Math.abs(noise.simplex3(sphere.attributes.position.array[i]*props.amplitudeFactor * props.amplitudeX, sphere.attributes.position.array[i+1]*props.amplitudeFactor * props.amplitudeY, sphere.attributes.position.array[i+2]*props.amplitudeFactor) * props.amplitudeZ);
+    var c1,c2,lerp
+    if (perlin <= 0.5) {
+      c1 = props.color1
+      c2 = props.color2
+      lerp = perlin / 0.5
+    } else {
+      c1 = props.color2
+      c2 = props.color3
+      lerp = (perlin - 0.5) * 2
+    }
+    // console.log(lerp)
     var color = new THREE.Vector3(
-      THREE.Math.lerp(props.color1[0], props.color2[0], perlin)/255,
-      THREE.Math.lerp(props.color1[1], props.color2[1], perlin)/255,
-      THREE.Math.lerp(props.color1[2], props.color2[2], perlin)/255
+      THREE.Math.lerp(c1[0], c2[0], lerp)/255,
+      THREE.Math.lerp(c1[1], c2[1], lerp)/255,
+      THREE.Math.lerp(c1[2], c2[2], lerp)/255
     );
     color.toArray(colors, i);
   }
@@ -129,9 +147,9 @@ domEvents.addEventListener(mesh, 'mouseout', function(event){
 function render(a) {
   requestAnimationFrame(render);
   for (var i = 0; i < temp.length; i+=3) {
-    var aX = temp[i]*0.008+a*0.0005
-    var aY = temp[i+1]*0.01+a*0.0005
-    var aZ = temp[i+2]*0.008
+    var aX = temp[i]*(0.008 * 1)+a*(0.0005 * props.distortSpeed)
+    var aY = temp[i+1]*(0.01 * 1)+a*(0.0005 * props.distortSpeed)
+    var aZ = temp[i+2]*(0.008 * 1)
     var perlin = noise.simplex3(aX, aY, aZ)
     temp[i] = spherePositions[i] + (perlin * props.distortFactor * props.distortX);
     temp[i+1] = spherePositions[i+1] + (perlin * props.distortFactor * props.distortY);
