@@ -1,5 +1,6 @@
 
-function Blob() {
+function Blob(diameter) {
+	diameter = diameter || 50
 	this.distortFactor = 0.5
 	this.distortSpeed = 1
 	this.distortX = 5
@@ -20,7 +21,7 @@ function Blob() {
 
 	var _this = this
 
-	var sphere = new THREE.SphereBufferGeometry(50,50,50)
+	var sphere = new THREE.SphereBufferGeometry(diameter,diameter,diameter)
 	this.sphere = sphere
 	var spherePositions = sphere.attributes.position.array.slice(0)
 	var temp = sphere.attributes.position.array;
@@ -32,7 +33,6 @@ function Blob() {
 	  vertexShader: vertexShader,
 	  fragmentShader: fragmentShader,
 	})
-
 	function getColors() {
 		var pArr = sphere.attributes.position.array
 		var colors = new Float32Array(pArr.length)
@@ -68,8 +68,8 @@ function Blob() {
 	this.render = function(delta) {
 		var a = delta + _this.seed
 		for (var i = 0; i < temp.length; i+=3) {
-		    var aX = temp[i]*(0.008 * 1)+a*(0.0005 * this.distortSpeed)
-		    var aY = temp[i+1]*(0.01 * 1)+a*(0.0005 * this.distortSpeed)
+		    var aX = temp[i]*(0.008 * this.distortSpeed)+(a*0.0005)
+		    var aY = temp[i+1]*(0.01 * this.distortSpeed)+(a*0.0005)
 		    var aZ = temp[i+2]*(0.008 * 1)
 		    var perlin = noise.simplex3(aX, aY, aZ)
 		    temp[i] = spherePositions[i] + (perlin * this.distortFactor * this.distortX);
